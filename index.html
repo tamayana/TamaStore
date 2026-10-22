@@ -2,145 +2,81 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Tama Store - QRIS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tama Store QRIS</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0a0a0a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Tama Store">
-<link rel="apple-touch-icon" href="icon.png">
+<meta name="theme-color" content="#000000">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
-*{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
-body{margin:0;background:#0a0a0a;color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding-bottom:200px}
-.header{padding:18px 16px 8px;text-align:center;width:100%}
-.card{width:92%;max-width:380px;background:#fff;border-radius:20px;padding:16px;margin-top:6px;display:flex;flex-direction:column;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.top{color:#111;font-weight:900}
-.qr{width:300px;height:300px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:10px 0;border:2px dashed #ddd;overflow:hidden}
-.badge{background:#111;color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;font-weight:800}
-.amount{width:92%;max-width:380px;background:#151515;border:1px solid #222;border-radius:16px;padding:14px;margin:14px 0}
-.sheet{position:fixed;left:0;right:0;background:#fff;color:#111;border-radius:24px 24px 0 0;padding:0 16px 20px;max-width:420px;margin:0 auto;box-shadow:0 -10px 40px rgba(0,0,0,.6);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:99;bottom:0}
-.sheet.minimized{transform:translateY(calc(100% - 90px))}
-.sheet-header{padding:12px 0 8px;text-align:center;cursor:pointer}
-.drag-handle{width:40px;height:5px;background:#ddd;border-radius:10px;margin:0 auto 10px}
-.keypad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.key{height:52px;border:none;background:#f3f3f5;border-radius:12px;font-size:20px;font-weight:600;color:#111}
-.btn{width:100%;height:52px;border:none;border-radius:12px;background:#e11d48;color:#fff;font-weight:800;margin-top:12px;font-size:14px}
-.hidden{display:none}
-#status{font-size:12px;text-align:center;padding:8px 12px;border-radius:10px;max-width:380px;margin:6px 0;font-weight:700}
-#qrcodeDiv canvas{width:280px!important;height:280px!important}
-.toggleHint{font-size:11px;opacity:.5;margin-top:4px}
-.fullscreenQR{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
-.fullscreenQR.hidden{display:none!important}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{background:#0a0a0a;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+.header{text-align:center;margin:12px 0}
+.header h1{font-size:22px;letter-spacing:2px}
+.header p{font-size:12px;opacity:.6;margin-top:4px}
+.qr-box{background:#fff;border-radius:20px;padding:16px;margin:12px 0;min-width:300px;min-height:300px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
+.qr-box .hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#000;font-size:10px;opacity:.5}
+.status{text-align:center;margin:8px 0;min-height:20px;font-size:13px}
+.status.ok{color:#00ff88}
+.status.err{color:#ff4444}
+.nominal-wrap{width:100%;max-width:380px;margin:12px 0}
+.nominal-wrap label{font-size:12px;opacity:.7;margin-bottom:6px;display:block}
+.nominal-display{background:#1a1a1a;border:2px solid #333;border-radius:12px;padding:16px;font-size:28px;font-weight:800;text-align:center;letter-spacing:1px;min-height:64px;display:flex;align-items:center;justify-content:center}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:380px;margin:16px 0}
+.key{background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:18px;font-size:22px;font-weight:700;text-align:center;cursor:pointer;user-select:none}
+.key:active{background:#333;transform:scale(.96)}
+.key.action{background:#fff;color:#000}
+.key.clear{background:#ff3b30;color:#fff;border-color:#ff3b30}
+.upload-btn{margin-top:12px;background:#222;border:1px dashed #555;border-radius:10px;padding:10px 16px;font-size:12px;color:#aaa;cursor:pointer;text-align:center;width:100%;max-width:380px}
+.footer{margin-top:auto;padding:16px 0;font-size:10px;opacity:.4;text-align:center}
 </style>
 </head>
 <body>
-<div class="header"><h1>MR.TAMA - Tama Store</h1><p style="opacity:.6;font-size:12px">NMID ID1025408255863</p></div>
-<div class="card">
-<div class="top">QRIS - TAMA STORE</div>
-<div class="qr" id="qrWrap"><div id="qrcodeDiv"></div></div>
-<div class="badge" id="badge">STATIS - Rp0</div>
-<p style="color:#111;font-size:11px;margin:8px 0 0;text-align:center;opacity:.6" id="amountDesc">Klik QR untuk fullscreen</p>
+<div class="header">
+<h1>TAMA STORE</h1>
+<p>QRIS DINAMIS V6 PERMANEN - Rp0 READY</p>
 </div>
-<div id="status" style="background:#f59e0b;color:#000">⬇️ Ketik nominal dulu</div>
-<div class="amount"><div style="font-size:11px;opacity:.5">JUMLAH BAYAR</div><div style="font-size:32px;font-weight:800">Rp<span id="amountText">0</span></div></div>
-<label for="fileInput" style="background:#222;color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer;display:block;font-size:12px;text-align:center;border:1px solid #333">📷 UPLOAD / GANTI QRIS ASLI</label>
-<input type="file" id="fileInput" accept="image/*" style="display:none">
-<div class="sheet" id="sheet">
-<div class="sheet-header" id="sheetHeader">
-<div class="drag-handle"></div>
-<h3 style="margin:0">Atur Harga</h3>
-<div class="toggleHint">Tap untuk sembunyikan / munculkan</div>
+<div class="qr-box" id="qrBox" onclick="toggleFull()">
+<div id="qrcode"></div>
+<div class="hint">KLIK QR UNTUK FULLSCREEN</div>
 </div>
-<div style="border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px"><div style="font-size:12px;opacity:.5">Jumlah</div><div id="inputDisplay" style="font-size:28px;font-weight:800">Rp0</div></div>
+<div class="status" id="status"></div>
+<div class="nominal-wrap">
+<label>NOMINAL (KETIK ANGKA, OTOMATIS GENERATE QR)</label>
+<div class="nominal-display" id="nominalDisplay">Rp 0</div>
+</div>
 <div class="keypad">
-<button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
-<button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
-<button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
-<button class="key" data-k="0">0</button><button class="key" data-k="000">000</button><button class="key" data-k="del">⌫</button>
+<div class="key" onclick="addNum('1')">1</div>
+<div class="key" onclick="addNum('2')">2</div>
+<div class="key" onclick="addNum('3')">3</div>
+<div class="key" onclick="addNum('4')">4</div>
+<div class="key" onclick="addNum('5')">5</div>
+<div class="key" onclick="addNum('6')">6</div>
+<div class="key" onclick="addNum('7')">7</div>
+<div class="key" onclick="addNum('8')">8</div>
+<div class="key" onclick="addNum('9')">9</div>
+<div class="key clear" onclick="clearAll()">C</div>
+<div class="key" onclick="addNum('0')">0</div>
+<div class="key action" onclick="clearAll()">OK</div>
 </div>
-<button class="btn" id="btnCreate">BUAT QRIS</button>
-<button class="btn hidden" id="btnReset" style="background:#fff;color:#111;border:1px solid #ddd">RESET KE Rp0</button>
-</div>
-<div class="fullscreenQR hidden" id="fsQR">
-<div style="background:#fff;padding:20px;border-radius:20px;display:flex;flex-direction:column;align-items:center">
-<div id="fsQRDiv"></div>
-<div style="color:#111;font-weight:800;margin-top:12px" id="fsAmount">Rp0</div>
-<div style="color:#666;font-size:12px">Scan untuk bayar</div>
-</div>
-<button onclick="document.getElementById('fsQR').classList.add('hidden')" style="margin-top:20px;background:#fff;color:#111;border:none;padding:12px 24px;border-radius:12px;font-weight:800">TUTUP</button>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<div class="upload-btn" onclick="document.getElementById('fileInput').click()">📷 GANTI QRIS JIKA PERLU (OPSIONAL)</div>
+<input type="file" id="fileInput" accept="image/*" style="display:none">
+<div class="footer">TAMA • Kota Pontianak • V6 Permanen • Offline Ready</div>
 <script>
-let basePayload=null,currentAmount="";
-const amountText=document.getElementById('amountText'),inputDisplay=document.getElementById('inputDisplay'),btnCreate=document.getElementById('btnCreate'),btnReset=document.getElementById('btnReset'),badge=document.getElementById('badge'),statusEl=document.getElementById('status'),qrcodeDiv=document.getElementById('qrcodeDiv'),sheet=document.getElementById('sheet'),sheetHeader=document.getElementById('sheetHeader'),amountDesc=document.getElementById('amountDesc'),fsQR=document.getElementById('fsQR'),fsQRDiv=document.getElementById('fsQRDiv'),fsAmount=document.getElementById('fsAmount');
-function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++){if(c&0x8000)c=(c<<1)^0x1021;else c<<=1;c&=0xFFFF}}return c.toString(16).toUpperCase().padStart(4,'0')}
-function makeDynamic(payload,amount){
-let noCrc=payload.split("6304")[0];
-if(noCrc.indexOf("010211")!==-1)noCrc=noCrc.replace("010211","010212");
-let cleaned="";let i=0;while(i+4<=noCrc.length){let tag=noCrc.substr(i,2);let len=parseInt(noCrc.substr(i+2,2),10);if(isNaN(len))break;let tot=4+len;if(tag==="54"){i+=tot;continue}cleaned+=noCrc.substr(i,tot);i+=tot}
-let insert=cleaned.indexOf("5802");if(insert===-1)insert=cleaned.length;
-let aStr=amount.toString();let aTag="54"+String(aStr.length).padStart(2,'0')+aStr;
-let withA=cleaned.slice(0,insert)+aTag+cleaned.slice(insert);
-let withCrc=withA+"6304";return withCrc+crc16(withCrc);
-}
-function renderQR(text){
-if(!text)return;
-qrcodeDiv.innerHTML="";fsQRDiv.innerHTML="";
-new QRCode(qrcodeDiv,{text:text,width:280,height:280,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
-new QRCode(fsQRDiv,{text:text,width:320,height:320,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
-}
-function updateDisplay(){
-let d=currentAmount?Number(currentAmount).toLocaleString('id-ID'):"0";
-amountText.textContent=d;
-inputDisplay.textContent="Rp"+d;
-btnCreate.textContent=currentAmount?"BUAT QRIS - Rp"+d:"BUAT QRIS";
-fsAmount.textContent="Rp"+d;
-if(!basePayload){statusEl.textContent="❌ Belum upload QRIS";statusEl.style.background="#ef4444";statusEl.style.color="#fff";badge.textContent="BELUM ADA QRIS";return}
-if(!currentAmount){statusEl.textContent="⬇️ Ketik nominal dulu (contoh 30000)";statusEl.style.background="#f59e0b";statusEl.style.color="#000";badge.textContent="STATIS - Rp0";badge.style.background="#111";amountDesc.textContent="QR statis - ketik nominal dulu";return}
-statusEl.textContent="✅ Siap bikin QRIS Rp"+d;statusEl.style.background="#22c55e";statusEl.style.color="#fff";
-}
-document.querySelectorAll('.key').forEach(k=>{
-k.addEventListener('click',()=>{
-let v=k.dataset.k;
-if(v==='del')currentAmount=currentAmount.slice(0,-1);
-else{if(currentAmount.length>=12)return;if(currentAmount===""&&(v==="0"||v==="000"))return;currentAmount+=v}
-updateDisplay();
-})
-});
-btnCreate.addEventListener('click',()=>{
-if(!basePayload){alert("Upload QRIS asli dulu!");return}
-if(!currentAmount){alert("Ketik nominal dulu! Contoh 30000");return}
-let dyn=makeDynamic(basePayload,currentAmount);
-renderQR(dyn);
-badge.textContent="DINAMIS Rp"+Number(currentAmount).toLocaleString('id-ID');
-badge.style.background="#e11d48";
-btnReset.classList.remove('hidden');
-statusEl.textContent="✅ QRIS Rp"+Number(currentAmount).toLocaleString('id-ID')+" JADI! Tap QR untuk fullscreen";
-statusEl.style.background="#e11d48";statusEl.style.color="#fff";
-amountDesc.textContent="Rp"+Number(currentAmount).toLocaleString('id-ID')+" - Tap QR untuk fullscreen";
-sheet.classList.add('minimized');
-});
-btnReset.addEventListener('click',()=>{
-currentAmount="";
-renderQR(basePayload);
-badge.textContent="STATIS - Rp0";badge.style.background="#111";
-btnReset.classList.add('hidden');
-updateDisplay();
-});
-sheetHeader.addEventListener('click',()=>{sheet.classList.toggle('minimized')});
-document.getElementById('qrWrap').addEventListener('click',()=>{if(basePayload)fsQR.classList.remove('hidden')});
-document.getElementById('fileInput').addEventListener('change',e=>{
-let file=e.target.files[0];if(!file)return;
-let img=new Image();
-img.onload=()=>{
-let c=document.createElement('canvas');c.width=img.width;c.height=img.height;let ctx=c.getContext('2d');ctx.drawImage(img,0,0);let data=ctx.getImageData(0,0,c.width,c.height);
-let code=jsQR(data.data,c.width,c.height);
-if(code&&code.data){basePayload=code.data.trim();localStorage.setItem('tama_qris_v5',basePayload);renderQR(basePayload);currentAmount="";updateDisplay();statusEl.textContent="✅ QRIS BARU TERBACA - Ketik nominal";statusEl.style.background="#22c55e";statusEl.style.color="#fff"}else{statusEl.textContent="❌ Gagal baca QR, foto blur";statusEl.style.background="#ef4444";statusEl.style.color="#fff"}
-};img.src=URL.createObjectURL(file)
-});
-let saved=localStorage.getItem('tama_qris_v5')||localStorage.getItem('tama_qris_v4')||localStorage.getItem('tama_qris_v3');
-if(saved){basePayload=saved;renderQR(basePayload);updateDisplay()}
+const EMBEDDED_QRIS = "00020101021126570011ID.DANA.WWW011893600915391940340102099194034010303UMI51440014ID.CO.QRIS.WWW0215ID10254082558630303UMI5204594553033605802ID5910Tama Store6014Kota Pontianak61057811363044B62";
+let basePayload = localStorage.getItem('tama_qris_v6') || EMBEDDED_QRIS;
+let currentAmount = localStorage.getItem('tama_amount_v6') || "0";
+let isFull=false;
+function setStatus(msg, ok=true){const s=document.getElementById('status');s.textContent=msg;s.className='status '+(ok?'ok':'err');}
+function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc ^= str.charCodeAt(i)<<8;for(let j=0;j<8;j++){if(crc & 0x8000) crc=((crc<<1)^0x1021)&0xFFFF;else crc=(crc<<1)&0xFFFF;}}let hex=crc.toString(16).toUpperCase();while(hex.length<4) hex='0'+hex;return hex;}
+function makeQris(base, amount){let idx=base.lastIndexOf("6304");let noCrc=idx!==-1?base.substring(0,idx):base;if(amount&&amount!=="0"){let amt=String(parseInt(amount,10));let tag54="54"+String(amt.length).padStart(2,'0')+amt;let idx58=noCrc.indexOf("5802ID");if(idx58!==-1){noCrc=noCrc.substring(0,idx58)+tag54+noCrc.substring(idx58);}else{noCrc+=tag54;}}noCrc+="6304";return noCrc+crc16(noCrc);}
+function renderQr(text){const el=document.getElementById('qrcode');el.innerHTML="";new QRCode(el,{text:text,width:isFull?Math.min(window.innerWidth-40,600):270,height:isFull?Math.min(window.innerWidth-40,600):270,correctLevel:QRCode.CorrectLevel.M});}
+function updateAll(){document.getElementById('nominalDisplay').textContent="Rp "+Number(currentAmount).toLocaleString('id-ID');const finalQris=makeQris(basePayload, currentAmount);renderQr(finalQris);localStorage.setItem('tama_amount_v6',currentAmount);if(currentAmount==="0") setStatus("✅ QR PERMANEN AKTIF - APK SIAP PAKAI (Rp 0 = tanpa nominal)",true);else setStatus("✅ QR DINAMIS: Rp "+Number(currentAmount).toLocaleString('id-ID'),true);}
+function addNum(n){if(currentAmount==="0") currentAmount=n;else{if(currentAmount.length>=12) return;currentAmount+=n;}updateAll();}
+function clearAll(){currentAmount="0";updateAll();}
+function toggleFull(){isFull=!isFull;const box=document.getElementById('qrBox');if(isFull){box.style.position='fixed';box.style.inset='0';box.style.zIndex='9999';box.style.minWidth='100vw';box.style.minHeight='100vh';box.style.borderRadius='0';box.style.background='#fff';box.style.display='flex';box.style.alignItems='center';box.style.justifyContent='center';}else{box.style.position='relative';box.style.inset='auto';box.style.zIndex='auto';box.style.minWidth='300px';box.style.minHeight='300px';box.style.borderRadius='20px';}updateAll();}
+document.getElementById('fileInput').addEventListener('change', function(e){const file=e.target.files[0];if(!file) return;const reader=new FileReader();reader.onload=function(ev){const img=new Image();img.onload=function(){const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);const code=jsQR(imageData.data,imageData.width,imageData.height);if(code&&code.data){basePayload=code.data;localStorage.setItem('tama_qris_v6',basePayload);setStatus("QRIS baru disimpan permanen!",true);updateAll();}else{setStatus("Gagal baca QRIS, coba foto lebih jelas",false);}};img.src=ev.target.result;};reader.readAsDataURL(file);});
+updateAll();
 </script>
 </body>
 </html>
