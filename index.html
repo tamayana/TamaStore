@@ -9,24 +9,25 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center}
-.top{background:#000;width:100%;text-align:center;padding:20px 16px 80px}
-.top h1{font-size:22px;font-weight:800;letter-spacing:.5px}
-.top p{font-size:12px;opacity:.6;margin-top:6px;letter-spacing:1px}
-.qr-card{background:#fff;border-radius:16px;width:90%;max-width:340px;margin:-60px auto 0;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);position:relative;z-index:2}
-.qr-card .title{text-align:center;color:#000;font-weight:800;font-size:14px;margin-bottom:8px;letter-spacing:.5px}
-.qr-card .box{border:2px dashed #e0e0e0;border-radius:12px;padding:10px;display:flex;justify-content:center;align-items:center;min-height:280px;background:#fff}
-.sheet{background:#fff;border-radius:28px 28px 0 0;width:100%;max-width:420px;margin-top:20px;padding:20px 20px 30px;color:#000;flex:1;min-height:420px}
-.sheet h2{text-align:center;font-size:18px;font-weight:700;margin-bottom:16px}
-.sheet label{font-size:12px;color:#888}
-.sheet .amount{font-size:32px;font-weight:800;margin:4px 0 12px;border-bottom:1px solid #eee;padding-bottom:12px}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
-.key{background:#f2f2f2;border-radius:12px;padding:16px;font-size:18px;font-weight:600;text-align:center;cursor:pointer;user-select:none}
-.key:active{background:#e0e0e0}
-.btn-red{background:#e11d48;color:#fff;border:none;border-radius:12px;padding:16px;width:100%;font-weight:800;font-size:14px;letter-spacing:.5px;cursor:pointer;margin-top:8px}
+body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+.top{background:#000;width:100%;text-align:center;padding:18px 16px 100px}
+.top h1{font-size:22px;font-weight:800;letter-spacing:.3px}
+.top p{font-size:12px;opacity:.55;margin-top:6px;letter-spacing:.8px}
+.qr-card{background:#fff;border-radius:16px;width:88%;max-width:340px;margin:-75px auto 0;padding:10px 10px 24px;box-shadow:0 10px 30px rgba(0,0,0,.6);position:relative;z-index:2;text-align:center}
+.qr-card .title{text-align:center;color:#000;font-weight:800;font-size:13px;margin:6px 0 10px;letter-spacing:.5px}
+.qr-card .box{border:1.5px dashed #e5e5e5;border-radius:12px;padding:8px;display:flex;justify-content:center;align-items:center;min-height:270px;background:#fff}
+.sheet{background:#fff;border-radius:26px 26px 0 0;width:100%;max-width:420px;margin-top:-22px;padding:14px 20px 26px;color:#000;position:relative;z-index:5;flex:1;box-shadow:0 -8px 30px rgba(0,0,0,.4)}
+.sheet .drag{width:36px;height:4px;background:#e0e0e0;border-radius:10px;margin:0 auto 14px}
+.sheet h2{text-align:center;font-size:17px;font-weight:700;margin-bottom:16px;color:#111}
+.sheet label{font-size:11px;color:#999;display:block;margin-bottom:2px}
+.sheet .amount{font-size:30px;font-weight:800;margin:0 0 12px;border-bottom:1px solid #f0f0f0;padding-bottom:12px;color:#000}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 6px}
+.key{background:#f2f2f7;border-radius:12px;padding:15px;font-size:18px;font-weight:600;text-align:center;cursor:pointer;user-select:none;color:#000}
+.key:active{background:#e5e5ea;transform:scale(.97)}
+.btn-red{background:#e11d48;color:#fff;border:none;border-radius:12px;padding:15px;width:100%;font-weight:800;font-size:13px;letter-spacing:.3px;cursor:pointer;margin-top:10px}
 .btn-red:active{transform:scale(.98)}
-.btn-reset{background:#fff;color:#000;border:1px solid #e0e0e0;border-radius:12px;padding:14px;width:100%;font-weight:700;font-size:13px;cursor:pointer;margin-top:10px}
-.footer-note{text-align:center;font-size:10px;color:#aaa;margin-top:12px}
+.btn-reset{background:#fff;color:#000;border:1px solid #e8e8e8;border-radius:12px;padding:13px;width:100%;font-weight:700;font-size:12px;cursor:pointer;margin-top:10px}
+.footer-note{text-align:center;font-size:10px;color:#aaa;margin-top:14px}
 #qrcode img{width:100%!important;height:auto!important}
 </style>
 </head>
@@ -40,6 +41,7 @@ body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:col
 <div class="box"><div id="qrcode"></div></div>
 </div>
 <div class="sheet">
+<div class="drag"></div>
 <h2>Atur Harga</h2>
 <label>Jumlah</label>
 <div class="amount" id="amountDisplay">Rp0</div>
@@ -59,7 +61,7 @@ body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:col
 </div>
 <button class="btn-red" id="btnCreate" onclick="createQris()">BUAT QRIS - Rp0</button>
 <button class="btn-reset" onclick="resetAll()">RESET</button>
-<div class="footer-note" id="status">✅ V7 PERMANEN SIAP - APK LANGSUNG JALAN</div>
+<div class="footer-note" id="status">✅ V7.1 BOTTOM SHEET FIX - PLEK KETIPLEK</div>
 </div>
 <script>
 const EMBEDDED_QRIS = "00020101021126570011ID.DANA.WWW011893600915391940340102099194034010303UMI51440014ID.CO.QRIS.WWW0215ID10254082558630303UMI5204594553033605802ID5910Tama Store6014Kota Pontianak61057811363044B62";
@@ -67,15 +69,13 @@ let basePayload = localStorage.getItem('tama_qris_v7') || EMBEDDED_QRIS;
 let currentAmount = localStorage.getItem('tama_amount_v7') || "0";
 function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){if(crc&0x8000)crc=((crc<<1)^0x1021)&0xFFFF;else crc=(crc<<1)&0xFFFF;}}let h=crc.toString(16).toUpperCase();while(h.length<4)h='0'+h;return h;}
 function makeQris(base, amount){let idx=base.lastIndexOf("6304");let noCrc=idx!==-1?base.substring(0,idx):base;if(amount&&amount!=="0"){let amt=String(parseInt(amount,10));let tag54="54"+String(amt.length).padStart(2,'0')+amt;let idx58=noCrc.indexOf("5802ID");if(idx58!==-1)noCrc=noCrc.substring(0,idx58)+tag54+noCrc.substring(idx58);else noCrc+=tag54;}noCrc+="6304";return noCrc+crc16(noCrc);}
-function renderQr(text){const el=document.getElementById('qrcode');el.innerHTML="";new QRCode(el,{text:text,width:260,height:260,correctLevel:QRCode.CorrectLevel.M});}
+function renderQr(text){const el=document.getElementById('qrcode');el.innerHTML="";new QRCode(el,{text:text,width:250,height:250,correctLevel:QRCode.CorrectLevel.M});}
 function updateDisplay(){let num=Number(currentAmount||0);let fmt=num.toLocaleString('id-ID');document.getElementById('amountDisplay').textContent="Rp"+fmt;document.getElementById('btnCreate').textContent="BUAT QRIS - Rp"+fmt;}
-function addNum(n){if(currentAmount==="0"){currentAmount=(n==="000"?"0":n);}else{currentAmount+=n;}if(currentAmount.length>12)currentAmount=currentAmount.substring(0,12);localStorage.setItem('tama_amount_v7',currentAmount);updateDisplay();}
+function addNum(n){if(currentAmount==="0")currentAmount=(n==="000"?"0":n);else currentAmount+=n;if(currentAmount.length>12)currentAmount=currentAmount.substring(0,12);localStorage.setItem('tama_amount_v7',currentAmount);updateDisplay();}
 function delNum(){if(currentAmount.length<=1)currentAmount="0";else currentAmount=currentAmount.slice(0,-1);localStorage.setItem('tama_amount_v7',currentAmount);updateDisplay();}
-function createQris(){let finalQris=makeQris(basePayload, currentAmount);renderQr(finalQris);let fmt=Number(currentAmount).toLocaleString('id-ID');document.getElementById('status').textContent="🔒 TERKUNCI Rp"+fmt+" - SIAP DI-SCAN CUSTOMER!";document.getElementById('status').style.color="#00aa00";if(currentAmount==="0")document.getElementById('status').textContent="✅ QR Rp0 SIAP (tanpa nominal)";}
-function resetAll(){currentAmount="0";localStorage.setItem('tama_amount_v7',"0");updateDisplay();createQris();document.getElementById('status').textContent="✅ DRESET - V7 PERMANEN SIAP";}
-// INIT
-updateDisplay();
-createQris();
+function createQris(){let finalQris=makeQris(basePayload, currentAmount);renderQr(finalQris);let fmt=Number(currentAmount).toLocaleString('id-ID');document.getElementById('status').textContent="🔒 TERKUNCI Rp"+fmt+" SIAP DI-SCAN!";if(currentAmount==="0")document.getElementById('status').textContent="✅ QR Rp0 SIAP";}
+function resetAll(){currentAmount="0";localStorage.setItem('tama_amount_v7',"0");updateDisplay();createQris();}
+updateDisplay();createQris();
 </script>
 </body>
 </html>
