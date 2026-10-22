@@ -1,14 +1,11 @@
 # MR.TAMA — Tama Store
 
-```sh
-$ whoami
-MR.TAMA
-Svelte Enthusiast • kalbar, ID
+> $ whoami
+> MR.TAMA — Svelte Enthusiast • kalbar, ID
 
-{
-  "store": "Tama Store",
-  "nmid": "ID1025408255863",
-  "provider": "DANA",
-  "status": "active"
-}
+![QRIS Tama Store](qris-tama-store.JPG)
 
+Tama Store
+NMID: ID1025408255863 • A01 • Powered by DANA
+
+SATU QRIS UNTUK SEMUA
