@@ -2,33 +2,37 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>MR.TAMA - Tama Store</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;height:100vh;position:relative}
-.top{background:#000;width:100%;text-align:center;padding:18px 16px 100px;flex-shrink:0}
+body{background:#000;color:#fff;min-height:100vh;overflow-x:hidden}
+.top{background:#000;width:100%;text-align:center;padding:18px 16px 90px}
 .top h1{font-size:22px;font-weight:800}
 .top p{font-size:12px;opacity:.55;margin-top:6px}
-.qr-card{background:#fff;border-radius:16px;width:88%;max-width:340px;margin:-75px auto 0;padding:10px 10px 24px;box-shadow:0 10px 30px rgba(0,0,0,.6);position:relative;z-index:2;text-align:center;flex-shrink:0}
-.qr-card .title{text-align:center;color:#000;font-weight:800;font-size:13px;margin:6px 0 10px}
-.qr-card .box{border:1.5px dashed #e5e5e5;border-radius:12px;padding:8px;display:flex;justify-content:center;min-height:270px;background:#fff}
-.sheet{background:#fff;border-radius:26px 26px 0 0;width:100%;max-width:420px;color:#000;position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(0);z-index:10;box-shadow:0 -8px 30px rgba(0,0,0,.5);transition:transform 0.3s cubic-bezier(0.2,0.8,0.2,1);touch-action:none;max-height:85vh;overflow-y:auto}
-.sheet .drag-area{padding:10px 0 0;width:100%;cursor:grab;touch-action:none}
-.sheet .drag{width:40px;height:5px;background:#ddd;border-radius:10px;margin:0 auto 14px}
-.sheet-content{padding:0 20px 26px}
-.sheet h2{text-align:center;font-size:17px;font-weight:700;margin-bottom:16px}
+.qr-card{background:#fff;border-radius:16px;width:88%;max-width:340px;margin:-70px auto 0;padding:10px 10px 24px;box-shadow:0 10px 30px rgba(0,0,0,.6);position:relative;z-index:2;text-align:center;transition:all .3s}
+.qr-card.expanded{transform:scale(1.08);margin-top:-40px}
+.qr-card .title{color:#000;font-weight:800;font-size:13px;margin:6px 0 10px}
+.qr-card .box{border:1.5px dashed #e5e5e5;border-radius:12px;padding:8px;display:flex;justify-content:center;min-height:260px;background:#fff}
+.qr-card .hint{font-size:10px;color:#999;margin-top:8px}
+.sheet{background:#fff;border-radius:26px 26px 0 0;width:100%;max-width:420px;margin:-18px auto 0;color:#000;position:relative;z-index:10;box-shadow:0 -8px 30px rgba(0,0,0,.5);transition:transform .35s cubic-bezier(0.2,0.8,0.2,1);padding-bottom:env(safe-area-inset-bottom)}
+.sheet.collapsed{transform:translateY(58%)}
+.sheet .drag-area{padding:14px 0 8px;width:100%;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
+.sheet .drag{width:42px;height:5px;background:#ddd;border-radius:10px;margin:0 auto}
+.sheet .drag-text{font-size:10px;color:#aaa;margin-top:6px;font-weight:600}
+.sheet-content{padding:8px 20px 120px}
+.sheet h2{text-align:center;font-size:17px;font-weight:700;margin-bottom:14px}
 .sheet label{font-size:11px;color:#999;display:block}
 .sheet .amount{font-size:30px;font-weight:800;margin:0 0 12px;border-bottom:1px solid #f0f0f0;padding-bottom:12px}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 6px}
-.key{background:#f2f2f7;border-radius:12px;padding:15px;font-size:18px;font-weight:600;text-align:center;cursor:pointer;user-select:none}
-.key:active{background:#e5e5ea}
-.btn-red{background:#e11d48;color:#fff;border:none;border-radius:12px;padding:15px;width:100%;font-weight:800;font-size:13px;cursor:pointer;margin-top:10px}
+.key{background:#f2f2f7;border-radius:12px;padding:15px;font-size:18px;font-weight:600;text-align:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.key:active{background:#e5e5ea;transform:scale(.96)}
+.btn-red{background:#e11d48;color:#fff;border:none;border-radius:12px;padding:16px;width:100%;font-weight:800;font-size:14px;cursor:pointer;margin-top:12px;letter-spacing:.3px}
 .btn-reset{background:#fff;color:#000;border:1px solid #e8e8e8;border-radius:12px;padding:13px;width:100%;font-weight:700;font-size:12px;cursor:pointer;margin-top:10px}
-.footer-note{text-align:center;font-size:10px;color:#aaa;margin-top:14px}
+.footer-note{text-align:center;font-size:10px;color:#aaa;margin-top:14px;padding-bottom:10px}
 #qrcode img{width:100%!important;height:auto!important}
 </style>
 </head>
@@ -40,9 +44,13 @@ body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:col
 <div class="qr-card" id="qrCard">
 <div class="title">QRIS - TAMA STORE</div>
 <div class="box"><div id="qrcode"></div></div>
+<div class="hint" id="qrHint">👆 TAP QR UNTUK PERBESAR</div>
 </div>
 <div class="sheet" id="sheet">
-<div class="drag-area" id="dragArea"><div class="drag"></div></div>
+<div class="drag-area" id="dragArea" onclick="toggleSheet()">
+<div class="drag"></div>
+<div class="drag-text" id="dragText">▼ TAP UNTUK LIAT QR FULL ▼</div>
+</div>
 <div class="sheet-content">
 <h2>Atur Harga</h2>
 <label>Jumlah</label>
@@ -63,39 +71,25 @@ body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:col
 </div>
 <button class="btn-red" id="btnCreate" onclick="createQris()">BUAT QRIS - Rp0</button>
 <button class="btn-reset" onclick="resetAll()">RESET</button>
-<div class="footer-note" id="status">⬆️⬇️ GESER ATAS BAWAH - V7.2 DRAGGABLE</div>
+<div class="footer-note" id="status">✅ V7.3 TAP TO TOGGLE - WORK 100%</div>
 </div>
 </div>
 <script>
 const EMBEDDED_QRIS = "00020101021126570011ID.DANA.WWW011893600915391940340102099194034010303UMI51440014ID.CO.QRIS.WWW0215ID10254082558630303UMI5204594553033605802ID5910Tama Store6014Kota Pontianak61057811363044B62";
 let basePayload = localStorage.getItem('tama_qris_v7') || EMBEDDED_QRIS;
 let currentAmount = localStorage.getItem('tama_amount_v7') || "0";
-// QR Logic
-function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){if(crc&0x8000)crc=((crc<<1)^0x1021)&0xFFFF;else crc=(crc<<1)&0xFFFF;}}let h=crc.toString(16).toUpperCase();while(h.length<4)h='0'+h;return h;}
-function makeQris(base, amount){let idx=base.lastIndexOf("6304");let noCrc=idx!==-1?base.substring(0,idx):base;if(amount&&amount!=="0"){let amt=String(parseInt(amount,10));let tag54="54"+String(amt.length).padStart(2,'0')+amt;let idx58=noCrc.indexOf("5802ID");if(idx58!==-1)noCrc=noCrc.substring(0,idx58)+tag54+noCrc.substring(idx58);else noCrc+=tag54;}noCrc+="6304";return noCrc+crc16(noCrc);}
-function renderQr(text){const el=document.getElementById('qrcode');el.innerHTML="";new QRCode(el,{text:text,width:250,height:250,correctLevel:QRCode.CorrectLevel.M});}
+let isCollapsed = false;
+function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF;}let h=c.toString(16).toUpperCase();while(h.length<4)h='0'+h;return h;}
+function makeQris(b,a){let idx=b.lastIndexOf("6304");let n=idx!=-1?b.substring(0,idx):b;if(a&&a!="0"){let amt=String(parseInt(a,10));let t="54"+String(amt.length).padStart(2,'0')+amt;let i=n.indexOf("5802ID");if(i!=-1)n=n.substring(0,i)+t+n.substring(i);else n+=t;}n+="6304";return n+crc16(n);}
+function renderQr(t){let e=document.getElementById('qrcode');e.innerHTML="";new QRCode(e,{text:t,width:280,height:280,correctLevel:QRCode.CorrectLevel.M});}
 function updateDisplay(){let num=Number(currentAmount||0);let fmt=num.toLocaleString('id-ID');document.getElementById('amountDisplay').textContent="Rp"+fmt;document.getElementById('btnCreate').textContent="BUAT QRIS - Rp"+fmt;}
-function addNum(n){if(currentAmount==="0")currentAmount=(n==="000"?"0":n);else currentAmount+=n;if(currentAmount.length>12)currentAmount=currentAmount.substring(0,12);localStorage.setItem('tama_amount_v7',currentAmount);updateDisplay();}
+function addNum(n){if(currentAmount=="0")currentAmount=(n=="000"?"0":n);else currentAmount+=n;if(currentAmount.length>12)currentAmount=currentAmount.slice(0,12);localStorage.setItem('tama_amount_v7',currentAmount);updateDisplay();}
 function delNum(){if(currentAmount.length<=1)currentAmount="0";else currentAmount=currentAmount.slice(0,-1);localStorage.setItem('tama_amount_v7',currentAmount);updateDisplay();}
-function createQris(){let finalQris=makeQris(basePayload, currentAmount);renderQr(finalQris);let fmt=Number(currentAmount).toLocaleString('id-ID');document.getElementById('status').textContent="🔒 TERKUNCI Rp"+fmt+" SIAP DI-SCAN!";if(currentAmount==="0")document.getElementById('status').textContent="⬆️⬇️ GESER ATAS BAWAH UNTUK LIAT QR";}
+function createQris(){let f=makeQris(basePayload,currentAmount);renderQr(f);let fmt=Number(currentAmount).toLocaleString('id-ID');document.getElementById('status').textContent="🔒 TERKUNCI Rp"+fmt+" SIAP DI-SCAN!";if(currentAmount=="0")document.getElementById('status').textContent="✅ QR SIAP - TAP UNTUK PERBESAR";}
 function resetAll(){currentAmount="0";localStorage.setItem('tama_amount_v7',"0");updateDisplay();createQris();}
+function toggleSheet(){let s=document.getElementById('sheet');let q=document.getElementById('qrCard');let dt=document.getElementById('dragText');let qh=document.getElementById('qrHint');isCollapsed=!isCollapsed;if(isCollapsed){s.classList.add('collapsed');q.classList.add('expanded');dt.textContent="▲ TAP UNTUK ATUR HARGA ▲";qh.textContent="👆 TAP LAGI UNTUK KECILKAN";window.scrollTo({top:0,behavior:'smooth'});}else{s.classList.remove('collapsed');q.classList.remove('expanded');dt.textContent="▼ TAP UNTUK LIAT QR FULL ▼";qh.textContent="👆 TAP QR UNTUK PERBESAR";}}
+document.getElementById('qrCard').addEventListener('click',toggleSheet);
 updateDisplay();createQris();
-// DRAGGABLE SHEET LOGIC
-let sheet=document.getElementById('sheet');
-let dragArea=document.getElementById('dragArea');
-let startY=0, currentTranslate=0, isDragging=false, lastTranslate=0, isExpanded=true;
-function getY(e){return e.touches?e.touches[0].clientY:e.clientY;}
-function onStart(e){isDragging=true;startY=getY(e);sheet.style.transition='none';}
-function onMove(e){if(!isDragging)return;let y=getY(e);let delta=y-startY;let newTranslate=lastTranslate+delta;if(newTranslate<0)newTranslate=0;if(newTranslate>300)newTranslate=300;currentTranslate=newTranslate;sheet.style.transform=`translateX(-50%) translateY(${currentTranslate}px)`;}
-function onEnd(){if(!isDragging)return;isDragging=false;sheet.style.transition='transform 0.3s cubic-bezier(0.2,0.8,0.2,1)';if(currentTranslate>100){lastTranslate=280;isExpanded=false;sheet.style.transform=`translateX(-50%) translateY(${lastTranslate}px)`;document.getElementById('status').textContent="⬆️ GESER KE ATAS UNTUK ATUR HARGA";}else{lastTranslate=0;isExpanded=true;sheet.style.transform=`translateX(-50%) translateY(0)`;document.getElementById('status').textContent="⬇️ GESER KE BAWAH UNTUK LIAT QR FULL";}currentTranslate=lastTranslate;}
-dragArea.addEventListener('touchstart',onStart,{passive:true});
-dragArea.addEventListener('touchmove',onMove,{passive:true});
-dragArea.addEventListener('touchend',onEnd);
-dragArea.addEventListener('mousedown',onStart);
-window.addEventListener('mousemove',onMove);
-window.addEventListener('mouseup',onEnd);
-// Klik QR untuk toggle juga
-document.getElementById('qrCard').addEventListener('click',()=>{if(isExpanded){lastTranslate=280;sheet.style.transform=`translateX(-50%) translateY(${lastTranslate}px)`;isExpanded=false;}else{lastTranslate=0;sheet.style.transform=`translateX(-50%) translateY(0)`;isExpanded=true;}});
 </script>
 </body>
 </html>
