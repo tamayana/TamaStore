@@ -9,23 +9,24 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
-.top{background:#000;width:100%;text-align:center;padding:18px 16px 100px}
-.top h1{font-size:22px;font-weight:800;letter-spacing:.3px}
-.top p{font-size:12px;opacity:.55;margin-top:6px;letter-spacing:.8px}
-.qr-card{background:#fff;border-radius:16px;width:88%;max-width:340px;margin:-75px auto 0;padding:10px 10px 24px;box-shadow:0 10px 30px rgba(0,0,0,.6);position:relative;z-index:2;text-align:center}
-.qr-card .title{text-align:center;color:#000;font-weight:800;font-size:13px;margin:6px 0 10px;letter-spacing:.5px}
-.qr-card .box{border:1.5px dashed #e5e5e5;border-radius:12px;padding:8px;display:flex;justify-content:center;align-items:center;min-height:270px;background:#fff}
-.sheet{background:#fff;border-radius:26px 26px 0 0;width:100%;max-width:420px;margin-top:-22px;padding:14px 20px 26px;color:#000;position:relative;z-index:5;flex:1;box-shadow:0 -8px 30px rgba(0,0,0,.4)}
-.sheet .drag{width:36px;height:4px;background:#e0e0e0;border-radius:10px;margin:0 auto 14px}
-.sheet h2{text-align:center;font-size:17px;font-weight:700;margin-bottom:16px;color:#111}
-.sheet label{font-size:11px;color:#999;display:block;margin-bottom:2px}
-.sheet .amount{font-size:30px;font-weight:800;margin:0 0 12px;border-bottom:1px solid #f0f0f0;padding-bottom:12px;color:#000}
+body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow:hidden;height:100vh;position:relative}
+.top{background:#000;width:100%;text-align:center;padding:18px 16px 100px;flex-shrink:0}
+.top h1{font-size:22px;font-weight:800}
+.top p{font-size:12px;opacity:.55;margin-top:6px}
+.qr-card{background:#fff;border-radius:16px;width:88%;max-width:340px;margin:-75px auto 0;padding:10px 10px 24px;box-shadow:0 10px 30px rgba(0,0,0,.6);position:relative;z-index:2;text-align:center;flex-shrink:0}
+.qr-card .title{text-align:center;color:#000;font-weight:800;font-size:13px;margin:6px 0 10px}
+.qr-card .box{border:1.5px dashed #e5e5e5;border-radius:12px;padding:8px;display:flex;justify-content:center;min-height:270px;background:#fff}
+.sheet{background:#fff;border-radius:26px 26px 0 0;width:100%;max-width:420px;color:#000;position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(0);z-index:10;box-shadow:0 -8px 30px rgba(0,0,0,.5);transition:transform 0.3s cubic-bezier(0.2,0.8,0.2,1);touch-action:none;max-height:85vh;overflow-y:auto}
+.sheet .drag-area{padding:10px 0 0;width:100%;cursor:grab;touch-action:none}
+.sheet .drag{width:40px;height:5px;background:#ddd;border-radius:10px;margin:0 auto 14px}
+.sheet-content{padding:0 20px 26px}
+.sheet h2{text-align:center;font-size:17px;font-weight:700;margin-bottom:16px}
+.sheet label{font-size:11px;color:#999;display:block}
+.sheet .amount{font-size:30px;font-weight:800;margin:0 0 12px;border-bottom:1px solid #f0f0f0;padding-bottom:12px}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 6px}
-.key{background:#f2f2f7;border-radius:12px;padding:15px;font-size:18px;font-weight:600;text-align:center;cursor:pointer;user-select:none;color:#000}
-.key:active{background:#e5e5ea;transform:scale(.97)}
-.btn-red{background:#e11d48;color:#fff;border:none;border-radius:12px;padding:15px;width:100%;font-weight:800;font-size:13px;letter-spacing:.3px;cursor:pointer;margin-top:10px}
-.btn-red:active{transform:scale(.98)}
+.key{background:#f2f2f7;border-radius:12px;padding:15px;font-size:18px;font-weight:600;text-align:center;cursor:pointer;user-select:none}
+.key:active{background:#e5e5ea}
+.btn-red{background:#e11d48;color:#fff;border:none;border-radius:12px;padding:15px;width:100%;font-weight:800;font-size:13px;cursor:pointer;margin-top:10px}
 .btn-reset{background:#fff;color:#000;border:1px solid #e8e8e8;border-radius:12px;padding:13px;width:100%;font-weight:700;font-size:12px;cursor:pointer;margin-top:10px}
 .footer-note{text-align:center;font-size:10px;color:#aaa;margin-top:14px}
 #qrcode img{width:100%!important;height:auto!important}
@@ -36,12 +37,13 @@ body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:col
 <h1>MR.TAMA - Tama Store</h1>
 <p>NMID ID1025408255863</p>
 </div>
-<div class="qr-card">
+<div class="qr-card" id="qrCard">
 <div class="title">QRIS - TAMA STORE</div>
 <div class="box"><div id="qrcode"></div></div>
 </div>
-<div class="sheet">
-<div class="drag"></div>
+<div class="sheet" id="sheet">
+<div class="drag-area" id="dragArea"><div class="drag"></div></div>
+<div class="sheet-content">
 <h2>Atur Harga</h2>
 <label>Jumlah</label>
 <div class="amount" id="amountDisplay">Rp0</div>
@@ -61,21 +63,39 @@ body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:col
 </div>
 <button class="btn-red" id="btnCreate" onclick="createQris()">BUAT QRIS - Rp0</button>
 <button class="btn-reset" onclick="resetAll()">RESET</button>
-<div class="footer-note" id="status">✅ V7.1 BOTTOM SHEET FIX - PLEK KETIPLEK</div>
+<div class="footer-note" id="status">⬆️⬇️ GESER ATAS BAWAH - V7.2 DRAGGABLE</div>
+</div>
 </div>
 <script>
 const EMBEDDED_QRIS = "00020101021126570011ID.DANA.WWW011893600915391940340102099194034010303UMI51440014ID.CO.QRIS.WWW0215ID10254082558630303UMI5204594553033605802ID5910Tama Store6014Kota Pontianak61057811363044B62";
 let basePayload = localStorage.getItem('tama_qris_v7') || EMBEDDED_QRIS;
 let currentAmount = localStorage.getItem('tama_amount_v7') || "0";
+// QR Logic
 function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){if(crc&0x8000)crc=((crc<<1)^0x1021)&0xFFFF;else crc=(crc<<1)&0xFFFF;}}let h=crc.toString(16).toUpperCase();while(h.length<4)h='0'+h;return h;}
 function makeQris(base, amount){let idx=base.lastIndexOf("6304");let noCrc=idx!==-1?base.substring(0,idx):base;if(amount&&amount!=="0"){let amt=String(parseInt(amount,10));let tag54="54"+String(amt.length).padStart(2,'0')+amt;let idx58=noCrc.indexOf("5802ID");if(idx58!==-1)noCrc=noCrc.substring(0,idx58)+tag54+noCrc.substring(idx58);else noCrc+=tag54;}noCrc+="6304";return noCrc+crc16(noCrc);}
 function renderQr(text){const el=document.getElementById('qrcode');el.innerHTML="";new QRCode(el,{text:text,width:250,height:250,correctLevel:QRCode.CorrectLevel.M});}
 function updateDisplay(){let num=Number(currentAmount||0);let fmt=num.toLocaleString('id-ID');document.getElementById('amountDisplay').textContent="Rp"+fmt;document.getElementById('btnCreate').textContent="BUAT QRIS - Rp"+fmt;}
 function addNum(n){if(currentAmount==="0")currentAmount=(n==="000"?"0":n);else currentAmount+=n;if(currentAmount.length>12)currentAmount=currentAmount.substring(0,12);localStorage.setItem('tama_amount_v7',currentAmount);updateDisplay();}
 function delNum(){if(currentAmount.length<=1)currentAmount="0";else currentAmount=currentAmount.slice(0,-1);localStorage.setItem('tama_amount_v7',currentAmount);updateDisplay();}
-function createQris(){let finalQris=makeQris(basePayload, currentAmount);renderQr(finalQris);let fmt=Number(currentAmount).toLocaleString('id-ID');document.getElementById('status').textContent="🔒 TERKUNCI Rp"+fmt+" SIAP DI-SCAN!";if(currentAmount==="0")document.getElementById('status').textContent="✅ QR Rp0 SIAP";}
+function createQris(){let finalQris=makeQris(basePayload, currentAmount);renderQr(finalQris);let fmt=Number(currentAmount).toLocaleString('id-ID');document.getElementById('status').textContent="🔒 TERKUNCI Rp"+fmt+" SIAP DI-SCAN!";if(currentAmount==="0")document.getElementById('status').textContent="⬆️⬇️ GESER ATAS BAWAH UNTUK LIAT QR";}
 function resetAll(){currentAmount="0";localStorage.setItem('tama_amount_v7',"0");updateDisplay();createQris();}
 updateDisplay();createQris();
+// DRAGGABLE SHEET LOGIC
+let sheet=document.getElementById('sheet');
+let dragArea=document.getElementById('dragArea');
+let startY=0, currentTranslate=0, isDragging=false, lastTranslate=0, isExpanded=true;
+function getY(e){return e.touches?e.touches[0].clientY:e.clientY;}
+function onStart(e){isDragging=true;startY=getY(e);sheet.style.transition='none';}
+function onMove(e){if(!isDragging)return;let y=getY(e);let delta=y-startY;let newTranslate=lastTranslate+delta;if(newTranslate<0)newTranslate=0;if(newTranslate>300)newTranslate=300;currentTranslate=newTranslate;sheet.style.transform=`translateX(-50%) translateY(${currentTranslate}px)`;}
+function onEnd(){if(!isDragging)return;isDragging=false;sheet.style.transition='transform 0.3s cubic-bezier(0.2,0.8,0.2,1)';if(currentTranslate>100){lastTranslate=280;isExpanded=false;sheet.style.transform=`translateX(-50%) translateY(${lastTranslate}px)`;document.getElementById('status').textContent="⬆️ GESER KE ATAS UNTUK ATUR HARGA";}else{lastTranslate=0;isExpanded=true;sheet.style.transform=`translateX(-50%) translateY(0)`;document.getElementById('status').textContent="⬇️ GESER KE BAWAH UNTUK LIAT QR FULL";}currentTranslate=lastTranslate;}
+dragArea.addEventListener('touchstart',onStart,{passive:true});
+dragArea.addEventListener('touchmove',onMove,{passive:true});
+dragArea.addEventListener('touchend',onEnd);
+dragArea.addEventListener('mousedown',onStart);
+window.addEventListener('mousemove',onMove);
+window.addEventListener('mouseup',onEnd);
+// Klik QR untuk toggle juga
+document.getElementById('qrCard').addEventListener('click',()=>{if(isExpanded){lastTranslate=280;sheet.style.transform=`translateX(-50%) translateY(${lastTranslate}px)`;isExpanded=false;}else{lastTranslate=0;sheet.style.transform=`translateX(-50%) translateY(0)`;isExpanded=true;}});
 </script>
 </body>
 </html>
