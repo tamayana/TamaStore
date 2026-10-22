@@ -16,7 +16,7 @@ body{background:#0a0a0a;color:#fff;min-height:100vh;display:flex;flex-direction:
 .header p{font-size:12px;opacity:.6;margin-top:4px}
 .qr-box{background:#fff;border-radius:20px;padding:16px;margin:12px 0;min-width:300px;min-height:300px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
 .qr-box .hint{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:#000;font-size:10px;opacity:.5}
-.status{text-align:center;margin:8px 0;min-height:20px;font-size:13px}
+.status{text-align:center;margin:8px 0;min-height:22px;font-size:13px;line-height:1.4}
 .status.ok{color:#00ff88}
 .status.err{color:#ff4444}
 .nominal-wrap{width:100%;max-width:380px;margin:12px 0}
@@ -34,7 +34,7 @@ body{background:#0a0a0a;color:#fff;min-height:100vh;display:flex;flex-direction:
 <body>
 <div class="header">
 <h1>TAMA STORE</h1>
-<p>QRIS DINAMIS V6 PERMANEN - Rp0 READY</p>
+<p>QRIS DINAMIS V6.1 FIX - Rp0 READY</p>
 </div>
 <div class="qr-box" id="qrBox" onclick="toggleFull()">
 <div id="qrcode"></div>
@@ -57,25 +57,26 @@ body{background:#0a0a0a;color:#fff;min-height:100vh;display:flex;flex-direction:
 <div class="key" onclick="addNum('9')">9</div>
 <div class="key clear" onclick="clearAll()">C</div>
 <div class="key" onclick="addNum('0')">0</div>
-<div class="key action" onclick="clearAll()">OK</div>
+<div class="key action" onclick="confirmOk()">OK</div>
 </div>
 <div class="upload-btn" onclick="document.getElementById('fileInput').click()">📷 GANTI QRIS JIKA PERLU (OPSIONAL)</div>
 <input type="file" id="fileInput" accept="image/*" style="display:none">
-<div class="footer">TAMA • Kota Pontianak • V6 Permanen • Offline Ready</div>
+<div class="footer">TAMA • Kota Pontianak • V6.1 Fix OK • Offline Ready</div>
 <script>
 const EMBEDDED_QRIS = "00020101021126570011ID.DANA.WWW011893600915391940340102099194034010303UMI51440014ID.CO.QRIS.WWW0215ID10254082558630303UMI5204594553033605802ID5910Tama Store6014Kota Pontianak61057811363044B62";
 let basePayload = localStorage.getItem('tama_qris_v6') || EMBEDDED_QRIS;
 let currentAmount = localStorage.getItem('tama_amount_v6') || "0";
 let isFull=false;
 function setStatus(msg, ok=true){const s=document.getElementById('status');s.textContent=msg;s.className='status '+(ok?'ok':'err');}
-function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc ^= str.charCodeAt(i)<<8;for(let j=0;j<8;j++){if(crc & 0x8000) crc=((crc<<1)^0x1021)&0xFFFF;else crc=(crc<<1)&0xFFFF;}}let hex=crc.toString(16).toUpperCase();while(hex.length<4) hex='0'+hex;return hex;}
+function crc16(str){let crc=0xFFFF;for(let i=0;i<str.length;i++){crc^=str.charCodeAt(i)<<8;for(let j=0;j<8;j++){if(crc&0x8000){crc=((crc<<1)^0x1021)&0xFFFF;}else{crc=(crc<<1)&0xFFFF;}}}let h=crc.toString(16).toUpperCase();while(h.length<4)h='0'+h;return h;}
 function makeQris(base, amount){let idx=base.lastIndexOf("6304");let noCrc=idx!==-1?base.substring(0,idx):base;if(amount&&amount!=="0"){let amt=String(parseInt(amount,10));let tag54="54"+String(amt.length).padStart(2,'0')+amt;let idx58=noCrc.indexOf("5802ID");if(idx58!==-1){noCrc=noCrc.substring(0,idx58)+tag54+noCrc.substring(idx58);}else{noCrc+=tag54;}}noCrc+="6304";return noCrc+crc16(noCrc);}
 function renderQr(text){const el=document.getElementById('qrcode');el.innerHTML="";new QRCode(el,{text:text,width:isFull?Math.min(window.innerWidth-40,600):270,height:isFull?Math.min(window.innerWidth-40,600):270,correctLevel:QRCode.CorrectLevel.M});}
-function updateAll(){document.getElementById('nominalDisplay').textContent="Rp "+Number(currentAmount).toLocaleString('id-ID');const finalQris=makeQris(basePayload, currentAmount);renderQr(finalQris);localStorage.setItem('tama_amount_v6',currentAmount);if(currentAmount==="0") setStatus("✅ QR PERMANEN AKTIF - APK SIAP PAKAI (Rp 0 = tanpa nominal)",true);else setStatus("✅ QR DINAMIS: Rp "+Number(currentAmount).toLocaleString('id-ID'),true);}
-function addNum(n){if(currentAmount==="0") currentAmount=n;else{if(currentAmount.length>=12) return;currentAmount+=n;}updateAll();}
+function updateAll(){document.getElementById('nominalDisplay').textContent="Rp "+Number(currentAmount).toLocaleString('id-ID');const finalQris=makeQris(basePayload, currentAmount);renderQr(finalQris);localStorage.setItem('tama_amount_v6',currentAmount);if(currentAmount==="0")setStatus("✅ QR PERMANEN AKTIF - APK SIAP PAKAI (Rp 0 = tanpa nominal)",true);else setStatus("✅ QR DINAMIS: Rp "+Number(currentAmount).toLocaleString('id-ID')+" - PENCET OK UNTUK KUNCI",true);}
+function addNum(n){if(currentAmount==="0")currentAmount=n;else{if(currentAmount.length>=12)return;currentAmount+=n;}updateAll();}
 function clearAll(){currentAmount="0";updateAll();}
+function confirmOk(){if(currentAmount==="0"){setStatus("⚠️ MASUKKAN NOMINAL DULU BUNG!",false);}else{setStatus("🔒 TERKUNCI - Rp "+Number(currentAmount).toLocaleString('id-ID')+" SIAP DI-SCAN CUSTOMER!",true);}}
 function toggleFull(){isFull=!isFull;const box=document.getElementById('qrBox');if(isFull){box.style.position='fixed';box.style.inset='0';box.style.zIndex='9999';box.style.minWidth='100vw';box.style.minHeight='100vh';box.style.borderRadius='0';box.style.background='#fff';box.style.display='flex';box.style.alignItems='center';box.style.justifyContent='center';}else{box.style.position='relative';box.style.inset='auto';box.style.zIndex='auto';box.style.minWidth='300px';box.style.minHeight='300px';box.style.borderRadius='20px';}updateAll();}
-document.getElementById('fileInput').addEventListener('change', function(e){const file=e.target.files[0];if(!file) return;const reader=new FileReader();reader.onload=function(ev){const img=new Image();img.onload=function(){const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);const code=jsQR(imageData.data,imageData.width,imageData.height);if(code&&code.data){basePayload=code.data;localStorage.setItem('tama_qris_v6',basePayload);setStatus("QRIS baru disimpan permanen!",true);updateAll();}else{setStatus("Gagal baca QRIS, coba foto lebih jelas",false);}};img.src=ev.target.result;};reader.readAsDataURL(file);});
+document.getElementById('fileInput').addEventListener('change', function(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(ev){const img=new Image();img.onload=function(){const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);const code=jsQR(imageData.data,imageData.width,imageData.height);if(code&&code.data){basePayload=code.data;localStorage.setItem('tama_qris_v6',basePayload);setStatus("QRIS baru disimpan permanen!",true);updateAll();}else{setStatus("Gagal baca QRIS, coba foto lebih jelas",false);}};img.src=ev.target.result;};reader.readAsDataURL(file);});
 updateAll();
 </script>
 </body>
