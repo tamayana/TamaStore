@@ -3,35 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tama Store - QRIS Dinamis V2</title>
+<title>Tama Store QRIS V3</title>
 <style>
 *{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
 body{margin:0;background:#0a0a0a;color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100vh}
-.header{padding:18px 16px 8px;text-align:center;width:100%}
+.header{padding:18px 16px 8px;text-align:center}
 .card{width:92%;max-width:380px;background:#fff;border-radius:20px;padding:12px;margin-top:6px;display:flex;flex-direction:column;align-items:center}
-.top{color:#111;font-weight:900;text-align:center}
-.qr{width:300px;height:300px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:8px 0;border:2px dashed #eee}
-.badge{background:#111;color:#fff;font-size:11px;padding:6px 12px;border-radius:20px;text-align:center}
+.top{color:#111;font-weight:900}
+.qr{width:300px;height:300px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:8px 0;border:2px dashed #ddd;overflow:hidden}
+.badge{background:#111;color:#fff;font-size:11px;padding:6px 12px;border-radius:20px}
 .amount{width:92%;max-width:380px;background:#151515;border:1px solid #222;border-radius:16px;padding:14px;margin:14px 0}
 .sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;color:#111;border-radius:24px 24px 0 0;padding:16px;max-width:420px;margin:0 auto;box-shadow:0 -10px 30px rgba(0,0,0,.6)}
 .keypad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.key{height:52px;border:none;background:#f3f3f5;border-radius:12px;font-size:20px;font-weight:600}
-.btn{width:100%;height:50px;border:none;border-radius:12px;background:#e11d48;color:#fff;font-weight:700;margin-top:12px}
-.btn:disabled{background:#ccc}
+.key{height:52px;border:none;background:#f3f3f5;border-radius:12px;font-size:20px;font-weight:600;color:#111}
+.btn{width:100%;height:52px;border:none;border-radius:12px;background:#e11d48;color:#fff;font-weight:800;margin-top:12px;font-size:14px}
 .hidden{display:none}
-#status{font-size:12px;text-align:center;padding:6px 12px;border-radius:10px;max-width:380px;margin:6px 0}
+#status{font-size:12px;text-align:center;padding:8px 12px;border-radius:10px;max-width:380px;margin:6px 0;font-weight:600}
+#qrcodeDiv canvas{width:280px!important;height:280px!important}
 </style>
 </head>
 <body>
-<div class="header"><h1>MR.TAMA - Tama Store</h1><p style="opacity:.6;font-size:12px">NMID ID1025408255863 • DANA</p></div>
+<div class="header"><h1>MR.TAMA - Tama Store</h1><p style="opacity:.6;font-size:12px">NMID ID1025408255863</p></div>
 <div class="card">
 <div class="top">QRIS - TAMA STORE</div>
-<div class="qr"><canvas id="qrcanvas" width="280" height="280"></canvas></div>
-<div class="badge" id="badge">TAP UPLOAD DULU</div>
+<div class="qr"><div id="qrcodeDiv"></div></div>
+<div class="badge" id="badge">UPLOAD QRIS DULU</div>
 </div>
-<div id="status" style="background:#222;color:#ff0">⬇️ Klik UPLOAD QRIS ASLI dulu sekali</div>
+<div id="status" style="background:#f59e0b;color:#000">Klik UPLOAD QRIS ASLI dulu</div>
 <div class="amount"><div style="font-size:11px;opacity:.5">JUMLAH BAYAR</div><div style="font-size:32px;font-weight:800">Rp<span id="amountText">0</span></div></div>
-<label for="fileInput" style="background:#fff;color:#111;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:80px;display:block">📷 KLIK INI UPLOAD QRIS ASLI</label>
+<label for="fileInput" style="background:#fff;color:#111;padding:12px 18px;border-radius:12px;font-weight:800;cursor:pointer;margin-bottom:100px;display:block">📷 KLIK UPLOAD QRIS ASLI</label>
 <input type="file" id="fileInput" accept="image/*" style="display:none">
 <div class="sheet">
 <div style="width:36px;height:4px;background:#ddd;border-radius:10px;margin:0 auto 12px"></div>
@@ -44,13 +44,13 @@ body{margin:0;background:#0a0a0a;color:#fff;display:flex;flex-direction:column;a
 <button class="key" data-k="0">0</button><button class="key" data-k="000">000</button><button class="key" data-k="del">⌫</button>
 </div>
 <button class="btn" id="btnCreate">BUAT QRIS - Rp0</button>
-<button class="btn hidden" id="btnReset" style="background:#fff;color:#111;border:1px solid #ddd">RESET KE STATIS</button>
+<button class="btn hidden" id="btnReset" style="background:#fff;color:#111;border:1px solid #ddd">RESET</button>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
-let basePayload=null,currentAmount="";
-const amountText=document.getElementById('amountText'),inputDisplay=document.getElementById('inputDisplay'),btnCreate=document.getElementById('btnCreate'),btnReset=document.getElementById('btnReset'),badge=document.getElementById('badge'),canvas=document.getElementById('qrcanvas'),statusEl=document.getElementById('status');
+let basePayload=null,currentAmount="",qrcodeObj=null;
+const amountText=document.getElementById('amountText'),inputDisplay=document.getElementById('inputDisplay'),btnCreate=document.getElementById('btnCreate'),btnReset=document.getElementById('btnReset'),badge=document.getElementById('badge'),statusEl=document.getElementById('status'),qrcodeDiv=document.getElementById('qrcodeDiv');
 function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++){if(c&0x8000)c=(c<<1)^0x1021;else c<<=1;c&=0xFFFF}}return c.toString(16).toUpperCase().padStart(4,'0')}
 function makeDynamic(payload,amount){
 let noCrc=payload.split("6304")[0];
@@ -61,14 +61,14 @@ let aStr=amount.toString();let aTag="54"+String(aStr.length).padStart(2,'0')+aSt
 let withA=cleaned.slice(0,insert)+aTag+cleaned.slice(insert);
 let withCrc=withA+"6304";return withCrc+crc16(withCrc);
 }
-function renderQR(t){if(!t){return}QRCode.toCanvas(canvas,t,{width:280,margin:1,errorCorrectionLevel:'M'},e=>{if(e){statusEl.textContent="Error QR: "+e;statusEl.style.background="#f44"}})}
-function updateDisplay(){let d=currentAmount?Number(currentAmount).toLocaleString('id-ID'):"0";amountText.textContent=d;inputDisplay.textContent="Rp"+d;btnCreate.textContent=currentAmount?"BUAT QRIS - Rp"+d:"BUAT QRIS - Rp0";if(!basePayload){statusEl.textContent="❌ Belum upload QRIS asli - Klik tombol putih UPLOAD QRIS ASLI";statusEl.style.background="#ef4444";statusEl.style.color="#fff";return}if(!currentAmount){statusEl.textContent="✅ QRIS siap! Ketik nominal dulu";statusEl.style.background="#22c55e";statusEl.style.color="#fff";return}statusEl.textContent="✅ Siap buat QRIS dinamis Rp"+d+" - Klik BUAT QRIS";statusEl.style.background="#22c55e";statusEl.style.color="#fff";}
-document.querySelectorAll('.key').forEach(k=>{k.addEventListener('click',()=>{let v=k.dataset.k;if(v==='del')currentAmount=currentAmount.slice(0,-1);else{if(currentAmount.length>=12)return;if(currentAmount===""&&(v==="0"||v==="000"))return;currentAmount+=v}updateDisplay()})});
-btnCreate.addEventListener('click',()=>{if(!basePayload){alert("Upload dulu foto QRIS asli Tama Store lu! Klik tombol putih UPLOAD QRIS ASLI");return}if(!currentAmount){alert("Ketik nominal dulu! Contoh 30000");return}try{let dyn=makeDynamic(basePayload,currentAmount);renderQR(dyn);badge.textContent="DINAMIS Rp"+Number(currentAmount).toLocaleString('id-ID');badge.style.background="#e11d48";btnReset.classList.remove('hidden');statusEl.textContent="✅ QRIS DINAMIS Rp"+Number(currentAmount).toLocaleString('id-ID')+" JADI! Customer bisa scan";statusEl.style.background="#e11d48";statusEl.style.color="#fff";}catch(e){alert("Error: "+e)}});
-btnReset.addEventListener('click',()=>{renderQR(basePayload);badge.textContent="STATIS";badge.style.background="#111";btnReset.classList.add('hidden');statusEl.textContent="Kembali ke statis";updateDisplay()});
-document.getElementById('fileInput').addEventListener('change',e=>{let file=e.target.files[0];if(!file)return;let img=new Image();img.onload=()=>{let c=document.createElement('canvas');c.width=img.width;c.height=img.height;let ctx=c.getContext('2d');ctx.drawImage(img,0,0);let data=ctx.getImageData(0,0,c.width,c.height);let code=jsQR(data.data,c.width,c.height);if(code&&code.data){basePayload=code.data.trim();localStorage.setItem('tama_qris_v2',basePayload);renderQR(basePayload);badge.textContent="STATIS - SIAP";statusEl.textContent="✅ QRIS ASLI TAMA STORE TERBACA! ("+basePayload.length+" char)";statusEl.style.background="#22c55e";statusEl.style.color="#fff";updateDisplay();}else{statusEl.textContent="❌ Gagal baca QR, foto blur / kepotong. Coba foto QR yang jelas";statusEl.style.background="#ef4444";statusEl.style.color="#fff"}};img.src=URL.createObjectURL(file)});
-let saved=localStorage.getItem('tama_qris_v2')||localStorage.getItem('tama_qris');if(saved){basePayload=saved;renderQR(basePayload);badge.textContent="STATIS - SIAP";statusEl.textContent="✅ QRIS tersimpan, tinggal ketik nominal";statusEl.style.background="#22c55e";statusEl.style.color="#fff";updateDisplay()}else{renderQR("https://tamayana.github.io/TamaStore/");statusEl.textContent="⬇️ WAJIB: Klik UPLOAD QRIS ASLI dulu (foto QR hitam)";statusEl.style.background="#f59e0b";statusEl.style.color="#000"}
-fetch('qris-tama-store.JPG').then(r=>r.blob()).then(b=>{if(b.size<500)return;let img=new Image();img.onload=()=>{let c=document.createElement('canvas');c.width=img.width;c.height=img.height;let ctx=c.getContext('2d');ctx.drawImage(img,0,0);let d=ctx.getImageData(0,0,c.width,c.height);let code=jsQR(d.data,c.width,c.height);if(code&&code.data&&!localStorage.getItem('tama_qris_v2')){basePayload=code.data.trim();localStorage.setItem('tama_qris_v2',basePayload);renderQR(basePayload);badge.textContent="STATIS - SIAP";statusEl.textContent="✅ Auto-load QR dari qris-tama-store.JPG berhasil!";statusEl.style.background="#22c55e";statusEl.style.color="#fff";updateDisplay()}};img.src=URL.createObjectURL(b)}).catch(()=>{});
+function renderQR(text){if(!text)return;qrcodeDiv.innerHTML="";qrcodeObj=new QRCode(qrcodeDiv,{text:text,width:280,height:280,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});}
+function updateDisplay(){let d=currentAmount?Number(currentAmount).toLocaleString('id-ID'):"0";amountText.textContent=d;inputDisplay.textContent="Rp"+d;btnCreate.textContent=currentAmount?"BUAT QRIS - Rp"+d:"BUAT QRIS - Rp0";if(!basePayload){statusEl.textContent="❌ Belum upload QRIS - Klik tombol UPLOAD";statusEl.style.background="#ef4444";statusEl.style.color="#fff";return}if(!currentAmount){statusEl.textContent="✅ QRIS siap! Ketik nominal (contoh 30000)";statusEl.style.background="#22c55e";statusEl.style.color="#fff";return}statusEl.textContent="✅ Siap bikin QRIS Rp"+d;statusEl.style.background="#22c55e";statusEl.style.color="#fff";}
+document.querySelectorAll('.key').forEach(k=>{k.addEventListener('click',()=>{let v=k.dataset.k;if(v==='del')currentAmount=currentAmount.slice(0,-1);else{if(currentAmount.length>=12)return;if(currentAmount===""&&(v==="0"||v==="000"))return;currentAmount+=v}updateDisplay();})});
+btnCreate.addEventListener('click',()=>{if(!basePayload){alert("Wajib upload QRIS asli dulu! Klik tombol putih 📷 UPLOAD QRIS ASLI");return}if(!currentAmount){alert("Ketik nominal dulu, contoh 30000");return}let dyn=makeDynamic(basePayload,currentAmount);renderQR(dyn);badge.textContent="DINAMIS Rp"+Number(currentAmount).toLocaleString('id-ID');badge.style.background="#e11d48";btnReset.classList.remove('hidden');statusEl.textContent="✅ QRIS Rp"+Number(currentAmount).toLocaleString('id-ID')+" JADI! Silakan scan";statusEl.style.background="#e11d48";statusEl.style.color="#fff";});
+btnReset.addEventListener('click',()=>{renderQR(basePayload);badge.textContent="STATIS";badge.style.background="#111";btnReset.classList.add('hidden');updateDisplay()});
+document.getElementById('fileInput').addEventListener('change',e=>{let file=e.target.files[0];if(!file)return;let img=new Image();img.onload=()=>{let c=document.createElement('canvas');c.width=img.width;c.height=img.height;let ctx=c.getContext('2d');ctx.drawImage(img,0,0);let data=ctx.getImageData(0,0,c.width,c.height);if(typeof jsQR==="undefined"){alert("jsQR gagal load, coba refresh");return}let code=jsQR(data.data,c.width,c.height);if(code&&code.data){basePayload=code.data.trim();localStorage.setItem('tama_qris_v3',basePayload);renderQR(basePayload);badge.textContent="STATIS SIAP";statusEl.textContent="✅ QRIS ASLI TERBACA! "+basePayload.length+" char";statusEl.style.background="#22c55e";statusEl.style.color="#fff";updateDisplay();}else{statusEl.textContent="❌ Gagal baca, foto blur/kepotong";statusEl.style.background="#ef4444";statusEl.style.color="#fff"}};img.src=URL.createObjectURL(file)});
+let saved=localStorage.getItem('tama_qris_v3')||localStorage.getItem('tama_qris_v2')||localStorage.getItem('tama_qris');if(saved){basePayload=saved;renderQR(basePayload);badge.textContent="STATIS SIAP";statusEl.textContent="✅ QRIS tersimpan";statusEl.style.background="#22c55e";statusEl.style.color="#fff";updateDisplay()}else{statusEl.textContent="⬇️ WAJIB: Klik UPLOAD QRIS ASLI dulu";statusEl.style.background="#f59e0b";statusEl.style.color="#000"}
+fetch('qris-tama-store.JPG').then(r=>r.blob()).then(b=>{if(!b||b.size<500)return;let img=new Image();img.onload=()=>{let c=document.createElement('canvas');c.width=img.width;c.height=img.height;let ctx=c.getContext('2d');ctx.drawImage(img,0,0);let d=ctx.getImageData(0,0,c.width,c.height);if(typeof jsQR==="undefined")return;let code=jsQR(d.data,c.width,c.height);if(code&&code.data&&!localStorage.getItem('tama_qris_v3')){basePayload=code.data.trim();localStorage.setItem('tama_qris_v3',basePayload);renderQR(basePayload);badge.textContent="STATIS SIAP";statusEl.textContent="✅ Auto-load QRIS berhasil!";statusEl.style.background="#22c55e";statusEl.style.color="#fff";updateDisplay()}};img.src=URL.createObjectURL(b)}).catch(()=>{});
 </script>
 </body>
 </html>
