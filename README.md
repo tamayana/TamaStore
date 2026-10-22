@@ -9,3 +9,6 @@ Tama Store
 NMID: ID1025408255863 • A01 • Powered by DANA
 
 SATU QRIS UNTUK SEMUA
+
+
+https://tamayana.github.io/tamastore/ atau https://tamayana.github.io/TamaStore/
